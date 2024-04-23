@@ -35,7 +35,7 @@ This project provides a Python-based solution for processing Siri VM data from t
 3. Install the required Python packages:
 
    ```bash
-   pip install requests lxml
+   pip install -r requirements.txt
    ```
 
 ### Usage
@@ -67,6 +67,13 @@ export BODS_API_KEY='your_api_key_here'
 - **`CSVview.py`**: Contains a script you can run on the DB to summarise the contents in CSV form.
 - **`HTMLview.py`**: Contains a script you can run on the DB to summarise the contents in HTML form.
 - **`measure_latency.py`**: A script to compare the response time to the recorded at time to find the record with the best latency.
+
+## Alternative method using direct ingestion from s3
+
+Configure valid AWS credentials as environment variables by either exporting AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_DEFAULT_REGION or AWS_PROFILE
+Configure the name of the s3 bucket to ingest from by exporting S3_BUCKET
+
+Execute get_from_s3.py
 
 
 ## Configuration

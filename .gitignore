@@ -1,8 +1,8 @@
 # created by virtualenv automatically
-*
 /archive/
 /Lib/
 /Scripts/
 /.gitignore
 .idea/
 pyvenv.cfg
+.venv
