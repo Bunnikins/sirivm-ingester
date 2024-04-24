@@ -70,6 +70,8 @@ export BODS_API_KEY='your_api_key_here'
 
 ## Alternative method using direct ingestion from s3
 
+- Set up a virtualenv, for example `python3 -m venv .venv;source .venv/bin/activate`
+- Run `pip install -r requirements.txt`
 - Copy `setenv.sh.example` to `setenv.sh` using `cp setenv.sh.example setenv.sh`
 - Configure valid AWS credentials as environment variables for **AWS_ACCESS_KEY_ID**, **AWS_SECRET_ACCESS_KEY** and **AWS_DEFAULT_REGION** in `setenv.sh`
 - Configure the name of the s3 bucket to ingest from as environment variable **S3_BUCKET** in `setenv.sh`
