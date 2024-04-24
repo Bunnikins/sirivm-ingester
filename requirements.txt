@@ -1,3 +1,4 @@
 lxml
 boto3
 requests
+pypeln
