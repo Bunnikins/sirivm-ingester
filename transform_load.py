@@ -149,7 +149,12 @@ def insert_data(db_path, data, cache):
             (line_id, journey_ref, date_of_journey, direction_ref))
         journey_id = c.execute(
             """SELECT JourneyID FROM Journeys WHERE LineID = ? AND JourneyRef = ? AND DateOfJourney = ? AND DirectionRef = ?""",
-            (line_id, journey_ref, date_of_journey, direction_ref)).fetchone()[0]
+            (line_id, journey_ref, date_of_journey, direction_ref)).fetchone()
+        if journey_id is not None:
+            journey_id = journey_id[0]
+        else:
+            # Handle the case where journey_id is None
+            print("Journey not found", line_name, line_id, operator_id, recorded_at_time)
 
         # Prepare position data for batch insert
         cache_key = f"{vehicle_ref}_{recorded_at_time}"

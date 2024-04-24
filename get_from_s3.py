@@ -4,11 +4,13 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 import zipfile
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from transform_load import validate_data,extract_data,parse_xml,init_db, insert_data, init_cache
 import sqlite3
+from pypeln import process, thread, sync
 
 S3_BUCKET = environ.get('S3_BUCKET')
+HOURS_TO_EXTRACT = float(environ.get('HOURS_TO_EXTRACT'))
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -27,22 +29,43 @@ def get_object(key):
     except Exception as e:
         print('Error:', e)
 
-def process_data(key):
+def parse_data_step(key_data):
+        logging.info('Parsing data')
+        return parse_xml(key_data, source_type='string')
+
+def validate_data_step(parsed_data):
+        logging.info('Validating data')
+        return validate_data(parsed_data)
+
+def insert_data_step(validated_data):
     try:
-        data = get_object(key)
+        logging.info('Creating cache')
         cache = init_cache(db_path)  # Initialize the cache
-        parsed_data = parse_xml(data, source_type='string')
-        valid_data = validate_data(parsed_data)
-        insert_data(db_path, valid_data, cache)  # Pass the cache to insert_data
+        logging.info('Inserting Data')
+        insert_data(db_path, validated_data, cache)  # Pass the cache to insert_data
     except Exception as e:
         logging.error("Error processing data", e)
     # logging.info("Data processing and insertion completed.")
 
-try:
-    init_db(db_path)
-    keys = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix='sirivm', MaxKeys=1)['Contents']
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        returned_data = list(executor.map(process_data, keys))
-        print(returned_data)
-except:
-    logging.error("Error fetching keys from S3")
+if __name__ == '__main__':
+    try:
+        keys = []
+        earliest_time = datetime.now(timezone.utc) - timedelta(hours=HOURS_TO_EXTRACT)
+        init_db(db_path)
+        paginator = s3.get_paginator('list_objects_v2')
+        operation_parameters = {'Bucket': S3_BUCKET,
+                                'Prefix': 'sirivm_20'}
+        page_iterator = paginator.paginate(**operation_parameters)
+        for page in page_iterator:
+            for key in page['Contents']:
+                if key['LastModified'] > earliest_time:
+                    keys.append(key)
+
+        logging.info(f'Found {str(len(keys))} keys more than x hours old')
+        stage = thread.map(get_object, keys, workers=5, maxsize=5)
+        stage = process.map(parse_data_step, stage, workers=5, maxsize=5)
+        stage = process.map(validate_data_step, stage, workers=5, maxsize=5)
+        stage = thread.map(insert_data_step, stage, workers=1, maxsize=5)
+        out=list(stage)
+    except Exception as e:
+        logging.error("Error fetching keys from S3", e)

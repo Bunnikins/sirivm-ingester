@@ -6,3 +6,8 @@
 .idea/
 pyvenv.cfg
 .venv
+setenv.sh
+*.db
+*.db-journal
+*.pyc
+__pycache__

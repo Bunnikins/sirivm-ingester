@@ -70,10 +70,12 @@ export BODS_API_KEY='your_api_key_here'
 
 ## Alternative method using direct ingestion from s3
 
-Configure valid AWS credentials as environment variables by either exporting AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_DEFAULT_REGION or AWS_PROFILE
-Configure the name of the s3 bucket to ingest from by exporting S3_BUCKET
-
-Execute get_from_s3.py
+- Copy `setenv.sh.example` to `setenv.sh` using `cp setenv.sh.example setenv.sh`
+- Configure valid AWS credentials as environment variables for **AWS_ACCESS_KEY_ID**, **AWS_SECRET_ACCESS_KEY** and **AWS_DEFAULT_REGION** in `setenv.sh`
+- Configure the name of the s3 bucket to ingest from as environment variable **S3_BUCKET** in `setenv.sh`
+- Configure the backlog of hours to extract as environment variable **HOURS_TO_EXTRACT** in `setenv.sh`
+- Run `source setenv.sh` to set environment variables
+- Execute `get_from_s3.py`
 
 
 ## Configuration
